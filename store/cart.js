@@ -4,44 +4,60 @@ import axiosApi from "~/config/axios";
 export const userCartStore = defineStore('cart', {
   state: () => ({
     message: null,
-    items: null,
+    items: [],
     loading: false,
   }),
   actions: {
     async addToCart(cartData) {
       try {
         this.loading = true;
-        var token = localStorage.getItem("token");
-        var response = await axiosApi.post("cart", cartData, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (response.status == 200) {
-          this.message = response.data.data.message;
-          alert(this.message);
-          this.getCartItems(); // Fixed: Corrected the function name
+
+        // Check if client-side (browser) to access localStorage
+        if (process.client) {
+          var token = localStorage.getItem("token");
+          var response = await axiosApi.post("cart", cartData, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+
+          if (response.status === 200) {
+            this.message = response.data.data.message;
+            alert(this.message);
+            await this.getCartItems();
+          }
+        } else {
+          // Handle server-side logic if needed (e.g., database access)
+          console.warn("Add to cart not available on server-side");
         }
       } catch (e) {
-        console.warn(e); // Fixed: Changed "$e" to "e"
+        console.warn(e);
       } finally {
         this.loading = false;
       }
     },
-    async getCartItems() { // Fixed: Corrected function name
+    async getCartItems() {
       try {
         this.loading = true;
-        var token = localStorage.getItem("token");
-        var response = await axiosApi.get("cart", { // Fixed: Changed "post" to "get"
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (response.status == 200) {
-          this.items = response.data.data.data;
-          alert(this.message); // Fixed: Alerting correct message
+
+        // Check if client-side (browser) to access localStorage
+        if (process.client) {
+          var token = localStorage.getItem("token");
+          var response = await axiosApi.get("cart", {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+
+          if (response.status === 200) {
+            this.items = response.data.data.data;
+            alert("Cart items retrieved successfully");
+          }
+        } else {
+          // Handle server-side logic if needed (e.g., database access)
+          console.warn("Get cart items not available on server-side");
         }
       } catch (e) {
-        console.warn(e); // Fixed: Changed "$e" to "e"
+        console.warn(e);
       } finally {
         this.loading = false;
       }
     },
-  }
+  },
 });

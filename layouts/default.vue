@@ -10,7 +10,7 @@
 
         <v-spacer></v-spacer>
         <v-btn prepend-icon="mdi-cart" @click = "router.push('/carts')"
-        >{{ cartStore.items.length }}</v-btn>
+        >{{ CartStore.items.length }}</v-btn>
 
         <v-btn
           v-if="authStore.token"
@@ -54,10 +54,10 @@
 
 import { useAuthStore } from "~/store/auth";
 const authStore = useAuthStore();
-import {useCartStore} from "~/store/cart";
-const cartStore = useCartStore();
+import {userCartStore} from "~/store/cart";
+const CartStore = userCartStore();
 CartStore.getCartItems();
-authStore.gettoken();
+authStore.getToken();;
 import {ref, watch } from "vue";
 const drawer = ref(false);
 const group = ref(null);

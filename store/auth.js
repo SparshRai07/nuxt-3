@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import axiosApi from "~/config/axios";
+import { navigateTo } from 'vue-router';
 
 export const useAuthStore = defineStore("auth", {
   state: () => ({
@@ -14,7 +15,7 @@ export const useAuthStore = defineStore("auth", {
         var response = await axiosApi.post("login", userData);
 
         if (response.status == 200) {
-          if (response.data.data.token != null) {
+          if (process.client && response.data.data.token != null) {
             this.token = response.data.data.token;
             localStorage.setItem("token", `${response.data.data.token}`);
             navigateTo("/");
@@ -27,22 +28,26 @@ export const useAuthStore = defineStore("auth", {
       }
     },
 
-    getToken( ) {
-     this.token = localStorage.getItem("token") ?? null;
+    getToken() {
+      if (process.client) {
+        this.token = localStorage.getItem("token") ?? null;
+      }
     },
 
     async logout() {
       try {
-        var token = localStorage.getItem("token");
-        this.loading = true;
-        var response = await axiosApi.get("logout", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        if (process.client) {
+          var token = localStorage.getItem("token");
+          this.loading = true;
+          var response = await axiosApi.get("logout", {
+            headers: { Authorization: `Bearer ${token}` },
+          });
 
-        console.warn(response.data);
-        if (response.status == 200) {
-          localStorage.removeItem("token");
-          navigateTo("/login");
+          console.warn(response.data);
+          if (response.status == 200) {
+            localStorage.removeItem("token");
+            navigateTo("/login");
+          }
         }
       } catch (e) {
         console.warn(e);
